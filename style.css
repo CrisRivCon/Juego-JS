@@ -1,0 +1,17 @@
+table, td{
+  border: 1px solid black;
+  border-spacing: inherit;
+}
+
+td {
+  text-align: center;
+  height: 20px;
+  width: 20px;
+}
+
+#cuerpo {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  height: 700px;
+}
