@@ -1,8 +1,10 @@
-var cuerpo = document.getElementById('cuerpo');
+var contenedorTabla = document.getElementById('tabla');
+var contenedorLista = document.getElementById('lista');
+var botonComprobar = document.getElementById('comprobar');
 const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 let ruta = "/spanish";
 let arrayPalabras;
-let resultado;
+let resultado = [];
 
 function crearTabla(filas, columnas, palabras) {
     let table = document.createElement('table');
@@ -12,9 +14,11 @@ function crearTabla(filas, columnas, palabras) {
 
         for ( j = 0; j < columnas; j++){
             let td = document.createElement('td');
-            td.setAttribute('id', i.toString() + j);
-            td.addEventListener('click', (e) => {
-                console.log(e);
+            td.setAttribute('id', i.toString() + j );
+            td.addEventListener('mousedown', (e) => {
+                let cuadrado = document.getElementById(e.target.id);
+                cuadrado.classList.add('amarillo');
+                // TODO: que seleccione al arrastras
             });
             td.textContent = letras[i][j];
             tr.append(td);            
@@ -23,7 +27,7 @@ function crearTabla(filas, columnas, palabras) {
         table.append(tr);
     }
 
-    cuerpo.append(table);
+    contenedorTabla.append(table);
 }
 
 // ***************************************************************************
@@ -51,7 +55,12 @@ function elegirPalabras(numero, arrayPalabras) {
     let elegidas = [];
 
     for (i = 0; i < numero; i++) {
-        elegidas.push(arrayPalabras[Math.trunc(Math.random() * arrayPalabras.length)]);
+        let palabra = arrayPalabras[Math.trunc(Math.random() * arrayPalabras.length)];
+        if (palabra.length > 5) {
+        elegidas.push(palabra);
+        } else {
+            i--;
+        }
     }
     return elegidas;
 }
@@ -87,12 +96,52 @@ function formarRelleno(filas, columnas, palabras) {
 }
 
 function compararPalabras(palabrasElegidas, palabra) {
+    let comprobacion;
     palabrasElegidas.forEach(element => {
-        if (element == palabra) {
+        console.log(palabra);
+        if (element.toLowerCase() == palabra.toLowerCase()) {
             resultado.push(element);
+            escribir(element);
+            console.log('si es igual');
+            comprobacion = true;
         }
     });
+
+    if (comprobacion) {
+        return true;
+    } else {
+        return false;
+    }
 }
+
+function sacarPalabra() {
+    let letras = document.getElementsByClassName('amarillo');
+    let palabra = '';
+    for ( i = 0; i < letras.length; i++) {
+        palabra += letras[i].textContent;
+    }
+    console.log(compararPalabras(palabrasElegidas, palabra));
+    if (compararPalabras(palabrasElegidas, palabra)) {
+        verifica(letras);
+    }
+}
+
+function verifica(letras) {
+    console.log(letras);
+    for ( i = 0; i < letras.length; i++) {
+        letras[i].classList.add('verde');
+    }
+    for ( i = 0; i < letras.length; i++) {
+        letras[i].classList.remove('amarillo');
+    }
+}
+
+function escribir(cadena) {
+    let p = document.createElement('p');
+    p.textContent = cadena
+    contenedorLista.append(p);
+}
+botonComprobar.addEventListener('click', sacarPalabra);
 
 let palabrasElegidas = elegirPalabras(5, arrayPalabras);
 console.log(palabrasElegidas);

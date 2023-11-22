@@ -1,12 +1,18 @@
 table, td{
-  border: 1px solid black;
-  border-spacing: inherit;
+  border: 3px solid #000000;
+  border-collapse: collapse;
+  background-color: #FFFFFF;
+  font-weight: bolder;
+}
+
+table {
+  border-radius: 10px;
 }
 
 td {
   text-align: center;
-  height: 20px;
-  width: 20px;
+  height: 30px;
+  width: 30px;
 }
 
 #cuerpo {
@@ -14,4 +20,24 @@ td {
   display: flex;
   justify-content: center;
   height: 700px;
+}
+
+.blanco {
+  background-color: #F8FFE5;
+}
+
+.rosa {
+  background-color: #EF476F;
+}
+
+.amarillo {
+  background-color: #FFC43D;
+}
+
+.azul {
+  background-color: #1B9AAA;
+}
+
+.verde {
+  background-color: #06D6A0;
 }
