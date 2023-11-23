@@ -4,7 +4,10 @@ var botonComprobar = document.getElementById('comprobar');
 const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 let ruta = "/spanish";
 let arrayPalabras;
-let resultado = [];
+let listaDeAcertadas = [];
+var filas = 10;
+var columnas = 15;
+var longitudPalabra = 6; // Longitud máxima de las palabras que aparecerán
 
 function crearTabla(filas, columnas, palabras) {
     let table = document.createElement('table');
@@ -15,11 +18,7 @@ function crearTabla(filas, columnas, palabras) {
         for ( j = 0; j < columnas; j++){
             let td = document.createElement('td');
             td.setAttribute('id', i.toString() + j );
-            td.addEventListener('mousedown', (e) => {
-                let cuadrado = document.getElementById(e.target.id);
-                cuadrado.classList.add('amarillo');
-                // TODO: que seleccione al arrastras
-            });
+            td.addEventListener('mousedown', seleccionarLetra);
             td.textContent = letras[i][j];
             tr.append(td);            
         }
@@ -28,6 +27,12 @@ function crearTabla(filas, columnas, palabras) {
     }
 
     contenedorTabla.append(table);
+}
+
+function seleccionarLetra(e) {
+    let cuadrado = document.getElementById(e.target.id);
+    cuadrado.classList.add('amarillo');
+    // TODO: que seleccione al arrastras
 }
 
 // ***************************************************************************
@@ -56,8 +61,8 @@ function elegirPalabras(numero, arrayPalabras) {
 
     for (i = 0; i < numero; i++) {
         let palabra = arrayPalabras[Math.trunc(Math.random() * arrayPalabras.length)];
-        if (palabra.length > 5) {
-        elegidas.push(palabra);
+        if (palabra.length < longitudPalabra) {
+            elegidas.push(palabra);
         } else {
             i--;
         }
@@ -66,43 +71,47 @@ function elegirPalabras(numero, arrayPalabras) {
 }
 
 function formarRelleno(filas, columnas, palabras) {
-    // TODO: crear array de filas x columnas y meter las palabras y en los huecos libres letras random. 
+    // Crea un array de filas x columnas, mete las palabras y en los huecos libres letras random. 
     let elegidas = palabras.slice();
-    let prueba = [];
+    let palabra = [];
     
-    elegidas.forEach(element => { prueba.push(element.split(''))})
+    elegidas.forEach(element => { palabra.push(element.split(''))})
     
     let arrayRelleno = [];
+    let unaPalabraPorFila;
 
     for (i = 0; i <= filas; i++) {
     
-        let nuevoArra = [];
+        let letrasFila = [];
+        unaPalabraPorFila = false;
 
         for (j = 0; j <= columnas; j++) {
             let random = Math.trunc(Math.random() * columnas);
-            if (prueba.length > 0 && j >= random && (columnas - j) >= prueba[0].length) {
-                prueba[0].forEach(element => {
-                    nuevoArra.push(element.toUpperCase());
+            if (palabra.length > 0 && j >= random && (columnas - j) >= palabra[0].length && !unaPalabraPorFila) {
+
+                palabra[0].forEach(element => {
+                    letrasFila.push(element.toUpperCase());
                     j++;
                 });
-                prueba.shift();
+                unaPalabraPorFila = true;
+                palabra.shift();
             } else {
-                nuevoArra.push(ABC[Math.trunc(Math.random() *  ABC.length)]);
+                letrasFila.push(ABC[Math.trunc(Math.random() *  ABC.length)]);
             }
         }
-        arrayRelleno.push(nuevoArra);
+        arrayRelleno.push(letrasFila);
     }
     return arrayRelleno;
 }
 
 function compararPalabras(palabrasElegidas, palabra) {
     let comprobacion;
+
     palabrasElegidas.forEach(element => {
-        console.log(palabra);
+
         if (element.toLowerCase() == palabra.toLowerCase()) {
-            resultado.push(element);
+            listaDeAcertadas.push(element);
             escribir(element);
-            console.log('si es igual');
             comprobacion = true;
         }
     });
@@ -120,19 +129,25 @@ function sacarPalabra() {
     for ( i = 0; i < letras.length; i++) {
         palabra += letras[i].textContent;
     }
-    console.log(compararPalabras(palabrasElegidas, palabra));
     if (compararPalabras(palabrasElegidas, palabra)) {
-        verifica(letras);
+        colorearAcertada(letras);
+    } else {
+        limpiarNoAcertada(letras);
     }
 }
 
-function verifica(letras) {
-    console.log(letras);
-    for ( i = 0; i < letras.length; i++) {
-        letras[i].classList.add('verde');
+
+
+function colorearAcertada(letrasSeleccionadas) {
+    while (letrasSeleccionadas.length > 0) {
+        letrasSeleccionadas[0].classList.add('verde');
+        letrasSeleccionadas[0].classList.remove('amarillo');
     }
-    for ( i = 0; i < letras.length; i++) {
-        letras[i].classList.remove('amarillo');
+}
+
+function limpiarNoAcertada(letrasSeleccionadas) {
+    while (letrasSeleccionadas.length > 0) {
+        letrasSeleccionadas[0].classList.remove('amarillo');
     }
 }
 
@@ -141,12 +156,13 @@ function escribir(cadena) {
     p.textContent = cadena
     contenedorLista.append(p);
 }
+
 botonComprobar.addEventListener('click', sacarPalabra);
 
 let palabrasElegidas = elegirPalabras(5, arrayPalabras);
 console.log(palabrasElegidas);
 
 
-let arrayRelleno = formarRelleno(10, 15, palabrasElegidas);
+let arrayRelleno = formarRelleno(filas, columnas, palabrasElegidas);
 
-crearTabla(10, 15, arrayRelleno);
+crearTabla(filas, columnas, arrayRelleno);
