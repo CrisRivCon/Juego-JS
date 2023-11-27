@@ -1,0 +1,88 @@
+table, td{
+  border: 3px solid #84A59D;
+  border-collapse: collapse;
+  background-color: #FFFFFF;
+}
+
+table {
+  border-radius: 10px;
+}
+
+td {
+  color: #F28482;
+  text-align: center;
+  height: 30px;
+  width: 30px;
+}
+
+#cuerpo {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  height: 700px;
+  align-items: center;
+  display: grid;
+  height: 700px;
+  grid-template-columns: 60% 15% 15%;
+  grid-template-rows: 30% 70%;
+  justify-items: center;
+}
+
+#tabla {
+  grid-row-start: 1;
+  grid-row-end: 3;
+}
+
+#lista {
+  grid-row-start: 2;
+  grid-row-end: 3;
+  grid-column-start: 2;
+  grid-column-end: 4;
+  align-self: baseline;
+  padding-top: 20px;
+}
+
+p, td, button {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-weight: bolder;
+}
+
+p {
+  color: #F28482;
+}
+
+button {
+  background-color: #84A59D;
+  color: #F5CAC3;
+  border-radius: 10px;
+  width: 150px;
+  height: 50px;
+}
+
+.boton {
+  align-self: end;
+}
+
+.blanco {
+  background-color: #F7EDE2;
+}
+
+.rosa {
+  background-color: #F5CAC3;
+}
+
+.rosa2 {
+  background-color: #F28482;
+}
+
+.amarillo {
+  background-color: #F6BD60;
+}
+
+.azul {
+  background-color: #84A59D;
+}
+
+.verde {
+  background-color: #06D6A0;
+}

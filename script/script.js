@@ -114,9 +114,9 @@ function formarRelleno(filas, columnas, palabras = null) {
     return arrayRelleno;
 }
 
-function validarPosicion(palabra, random, columnas, unaPalabraPorFila = false) {
+/* function validarPosicion(palabra, random, columnas, unaPalabraPorFila = false) {
     return palabra.length > 0 && j >= random && (columnas - j) >= palabra[0].length && !unaPalabraPorFila;
-}
+} */
 
 function seleccionarLetra(e) {
     let cuadrado = document.getElementById(e.target.id);
@@ -190,12 +190,11 @@ function sacarPalabra() {
     }
     if (compararPalabras(palabrasElegidas, palabra)) {
         colorearAcertada(letras);
+        listaPalabras.marcarAcertada(palabra);
     } else {
         limpiarNoAcertada(letras);
     }
 }
-
-
 
 function colorearAcertada(letrasSeleccionadas) {
     while (letrasSeleccionadas.length > 0) {
@@ -222,9 +221,31 @@ function escribirError(error) {
 }
 
 botonComprobar.addEventListener('click', sacarPalabra);
-
-
 let palabrasElegidas = elegirPalabras(5, arrayPalabras);
-console.log(palabrasElegidas);
-
 crearTabla(filas, columnas, formarRelleno(filas, columnas, palabrasElegidas));
+
+// -------------------------------- Manipulación de objetos ---------------------------------
+function Palabras(arrayPalabras) {
+    this.palabras = arrayPalabras;
+
+    this.escribirPalabras = function (nodo) {
+        arrayPalabras.forEach(palabra => {
+            let p = document.createElement('p');
+            p.textContent = palabra
+            p.setAttribute('id', palabra);
+            nodo.append(p);
+        });
+    }
+
+    this.marcarAcertada = function (id) {
+        let palaraAcertada = document.getElementById(id);
+        palaraAcertada.classList.add('rosa');
+    }
+}
+
+let listaPalabras = new Palabras(palabrasElegidas);
+listaPalabras.escribirPalabras(lista);
+
+
+
+//---------------------------------------------------------------------------------------------
