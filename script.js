@@ -120,7 +120,11 @@ function validarPosicion(palabra, random, columnas, unaPalabraPorFila = false) {
 
 function seleccionarLetra(e) {
     let cuadrado = document.getElementById(e.target.id);
-    cuadrado.classList.add('amarillo');
+    if (cuadrado.hasAttribute('disable')) {
+        return;
+    } else {
+        cuadrado.classList.add('amarillo');
+    }
     // TODO: que seleccione al arrastras
 }
 
@@ -196,6 +200,7 @@ function sacarPalabra() {
 function colorearAcertada(letrasSeleccionadas) {
     while (letrasSeleccionadas.length > 0) {
         letrasSeleccionadas[0].classList.add('verde');
+        letrasSeleccionadas[0].setAttribute('disable', '');
         letrasSeleccionadas[0].classList.remove('amarillo');
     }
 }
@@ -212,11 +217,14 @@ function escribir(cadena) {
     contenedorLista.append(p);
 }
 
+function escribirError(error) {
+    
+}
+
 botonComprobar.addEventListener('click', sacarPalabra);
 
 
 let palabrasElegidas = elegirPalabras(5, arrayPalabras);
 console.log(palabrasElegidas);
-let arrayRelleno = formarRelleno(filas, columnas, palabrasElegidas);
 
-crearTabla(filas, columnas, arrayRelleno);
+crearTabla(filas, columnas, formarRelleno(filas, columnas, palabrasElegidas));
