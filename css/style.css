@@ -1,3 +1,20 @@
+* {
+  box-sizing: content-box;
+  font-weight: bolder;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  color: #84A59D;
+  align-self: center;
+  font-size: 3em;
+  letter-spacing: .3em;
+  grid-column-start: 1;
+  grid-column-end: 4;
+}
+
 table, td{
   border: 3px solid #84A59D;
   border-collapse: collapse;
@@ -16,35 +33,44 @@ td {
 }
 
 #cuerpo {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  height: 700px;
-  align-items: center;
+  height: 100vh;
   display: grid;
-  height: 700px;
-  grid-template-columns: 60% 15% 15%;
-  grid-template-rows: 30% 70%;
+  grid-template-columns: 60% 20% 20%;
+  grid-template-rows: 20% 23% 57%;
   justify-items: center;
 }
 
 #tabla {
-  grid-row-start: 1;
-  grid-row-end: 3;
+  align-self: center;
+  grid-row-start: 2;
+  grid-row-end: 4;
 }
 
 #lista {
-  grid-row-start: 2;
-  grid-row-end: 3;
+  grid-row-start: 3;
+  grid-row-end: 4;
   grid-column-start: 2;
   grid-column-end: 4;
   align-self: baseline;
   padding-top: 20px;
 }
 
-p, td, button {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-weight: bolder;
+#marcador {
+  border: 2px solid #84A59D;
+  text-align: center;
+  width: 60px;
+  height: 60px;
+  background-color: #84A59D;
+}
+
+#marcador p:first-child {
+  font-size: 1.4em;
+  font-weight: normal;
+  color: #F6BD60;
+}
+
+p {
+  margin: 15px 0;
 }
 
 p {
@@ -59,8 +85,10 @@ button {
   height: 50px;
 }
 
-.boton {
+.boton-comprobar, .boton-resetear {
   align-self: end;
+  grid-row-start: 2;
+  grid-row-end: 3;
 }
 
 .blanco {

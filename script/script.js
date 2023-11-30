@@ -1,5 +1,6 @@
 var contenedorTabla = document.getElementById('tabla');
 var contenedorLista = document.getElementById('lista');
+var contenedorMarcador = document.getElementById('marcador');
 var botonComprobar = document.getElementById('comprobar');
 const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L','M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
 let ruta = "/spanish";
@@ -8,6 +9,7 @@ let listaDeAcertadas = [];
 var filas = 10;
 var columnas = 15;
 var longitudPalabra = 6; // Longitud máxima de las palabras que aparecerán
+var numPalabras = 5; // Número de palabras a buscar en la sopa de letras
 
 function crearTabla(filas, columnas, palabras) {
     let table = document.createElement('table');
@@ -114,16 +116,12 @@ function formarRelleno(filas, columnas, palabras = null) {
     return arrayRelleno;
 }
 
-/* function validarPosicion(palabra, random, columnas, unaPalabraPorFila = false) {
-    return palabra.length > 0 && j >= random && (columnas - j) >= palabra[0].length && !unaPalabraPorFila;
-} */
-
 function seleccionarLetra(e) {
     let cuadrado = document.getElementById(e.target.id);
     if (cuadrado.hasAttribute('disable')) {
         return;
     } else {
-        cuadrado.classList.add('amarillo');
+        cuadrado.classList.toggle('amarillo');
     }
     // TODO: que seleccione al arrastras
 }
@@ -170,7 +168,6 @@ function compararPalabras(palabrasElegidas, palabra) {
 
         if (element.toLowerCase() == palabra.toLowerCase()) {
             listaDeAcertadas.push(element);
-            escribir(element);
             comprobacion = true;
         }
     });
@@ -191,6 +188,7 @@ function sacarPalabra() {
     if (compararPalabras(palabrasElegidas, palabra)) {
         colorearAcertada(letras);
         listaPalabras.marcarAcertada(palabra);
+        listaPalabras.mostrarMarcador(contenedorMarcador);
     } else {
         limpiarNoAcertada(letras);
     }
@@ -210,10 +208,13 @@ function limpiarNoAcertada(letrasSeleccionadas) {
     }
 }
 
-function escribir(cadena) {
+function escribir(cadena, elementoDom = null, id = false) {
     let p = document.createElement('p');
     p.textContent = cadena
-    contenedorLista.append(p);
+    if (id) {
+        p.setAttribute('id', cadena);
+    }
+    elementoDom.append(p);
 }
 
 function escribirError(error) {
@@ -221,30 +222,46 @@ function escribirError(error) {
 }
 
 botonComprobar.addEventListener('click', sacarPalabra);
-let palabrasElegidas = elegirPalabras(5, arrayPalabras);
+let palabrasElegidas = elegirPalabras(numPalabras, arrayPalabras);
 crearTabla(filas, columnas, formarRelleno(filas, columnas, palabrasElegidas));
 
 // -------------------------------- Manipulación de objetos ---------------------------------
-function Palabras(arrayPalabras) {
+function Palabras(arrayPalabras, palabrasAcertadas =  []) {
     this.palabras = arrayPalabras;
+    this.acertadas = palabrasAcertadas;
 
     this.escribirPalabras = function (nodo) {
         arrayPalabras.forEach(palabra => {
-            let p = document.createElement('p');
-            p.textContent = palabra
-            p.setAttribute('id', palabra);
-            nodo.append(p);
+            escribir(palabra, nodo, true)
         });
     }
 
     this.marcarAcertada = function (id) {
         let palaraAcertada = document.getElementById(id);
         palaraAcertada.classList.add('rosa');
+        this.acertadas.push(palaraAcertada);
+    }
+
+    this.numeroAcertadas = function( ){
+        return this.acertadas.length;
+    }
+
+    this.totalPalabras = function () {
+        return this.palabras.length;
+    }
+
+    this.mostrarMarcador = function (nodo) {
+        if ( nodo.hasChildNodes() ) {
+            nodo.removeChild(nodo.firstChild);
+        }
+        console.log(this.numeroAcertadas());
+        escribir(this.numeroAcertadas() + '/' + this.totalPalabras(), nodo);
     }
 }
 
 let listaPalabras = new Palabras(palabrasElegidas);
 listaPalabras.escribirPalabras(lista);
+listaPalabras.mostrarMarcador(contenedorMarcador);
 
 
 
