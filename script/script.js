@@ -3,27 +3,29 @@ var contenedorLista = document.getElementById('lista');
 var contenedorMarcador = document.getElementById('marcador');
 var botonComprobar = document.getElementById('comprobar');
 var botonResetear = document.getElementById('resetear');
-const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L','M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
-let ruta = "/spanish";
+const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
+let ruta = "spanish";
 let arrayPalabras;
 let listaDeAcertadas = [];
-var filas = 10;
+var posiblesSelect = [];
+var filas = 30;
 var columnas = 15;
-var longitudPalabra = 6; // Longitud máxima de las palabras que aparecerán
-var numPalabras = 5; // Número de palabras a buscar en la sopa de letras
+var longitudPalabra = 8; // Longitud máxima de las palabras que aparecerán
+var numPalabras = 1; // Número de palabras a buscar en la sopa de letras
+var numHorizontales = 3; // Número de palabras que se pondrán horizontales, el resto en vertical.
 
 function crearTabla(filas, columnas, palabras) {
     let table = document.createElement('table');
     let letras = palabras.slice();
-    for ( i = 0; i < filas; i++) {
+    for (i = 0; i < filas; i++) {
         let tr = document.createElement('tr');
 
-        for ( j = 0; j < columnas; j++){
+        for (j = 0; j < columnas; j++) {
             let td = document.createElement('td');
-            td.setAttribute('id', i.toString() + j );
+            td.setAttribute('id', i.toString() + j);
             td.addEventListener('mousedown', seleccionarLetra);
             td.textContent = letras[i][j];
-            tr.append(td);            
+            tr.append(td);
         }
 
         table.append(tr);
@@ -31,102 +33,88 @@ function crearTabla(filas, columnas, palabras) {
 
     contenedorTabla.append(table);
 }
-// ****************************************************************************
-const range = (start, stop, step) =>
-  Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
-
-  //https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/from
-//*******************************************************************************
 
 function crearPosiciones(filas, columnas, palabras) {
     let posiciones = [];
     let posicionPalabra;
     let lonPalabra;
-    let rangoFilas = range(0, filas, 1);
-    let rangoColumnas = range(0, columnas, 1);
+    let contadorHorizontales = 0;
 
-    palabras.forEach(palabra => {
+    while (palabras.length > 0) {
+        let palabra = palabras[0];
         posicionPalabra = [];
-        palabra = palabra;
         lonPalabra = palabra.length;
-        let posicionLetraC = Math.trunc(Math.random() * (columnas - lonPalabra));
-        let posicionLetraF = Math.trunc(Math.random() * (filas - lonPalabra));
-        console.log(posicionLetraF + ' Fila');
-        
-        if ( palabras.indexOf(palabra) < 3) { // Horizontal
-            for (let i = 0; i < lonPalabra; i++){ 
-                posicionPalabra.push([rangoFilas[posicionLetraF], (rangoColumnas[posicionLetraC] + i)]); 
+        let col = Math.trunc(Math.random() * columnas);  
+        let fila = Math.trunc(Math.random() * filas);
+        try {
+            if (contadorHorizontales < numHorizontales) { // Posiciones de palabras en horizontal 
+                if ((columnas - col) > lonPalabra) {
+                    for (let i = 0; i < lonPalabra; i++) {
+                        posiciones.forEach(posicion => {
+                            for ( j = 0; j < posicion.length; j++) {
+                                if (posicion[j][0] == fila && posicion[j][1] == col + i && posicion[j][2] != palabra[i]) {
+                                    throw 'error'; // Si coincide la posición de la fila y la columna y no la letra, lanza un error.
+                                }
+                            }
+                        });
+                        posicionPalabra.push([fila, col + i, palabra[i]]);
+                    }
+                    contadorHorizontales++;
+                } else {
+                    throw 'error';
+                }
+            } else { // Posiciones de palabras en vertical
+                if ((filas - fila) > lonPalabra) {
+                    for (let i = 0; i < lonPalabra; i++) {
+                        posiciones.forEach(posicion => {
+                            for ( j = 0; j < posicion.length; j++) {
+                                if (posicion[j][0] == fila + i && posicion[j][1] == col) {
+                                    throw 'error'; // Si coincide la posición de la fila y la columna, lanza un error.
+                                }
+                            }
+                        });
+                        posicionPalabra.push([fila + i, col, palabra[i]]);
+                    }
+                } else {
+                    throw 'error';
+                }
             }
-        } else { // Vertical
-            for (let i = 0; i < lonPalabra; i++){
-                console.log(rangoFilas[posicionLetraF] + i + ' + i');
-                posicionPalabra.push([posicionLetraF + i, (rangoColumnas[posicionLetraC])]); 
-
-            }
-        }   
+            palabras.splice(0, 1);
+        } catch (error) {
+            continue;
+        }
         posiciones.push(posicionPalabra);
-        rangoFilas.splice(posicionLetraF, 1);
-    });
-    console.log(posiciones);
+    }
     return posiciones;
 }
 
 function formarRelleno(filas, columnas, palabras = null) {
     // Crea un array de filas x columnas, mete las palabras y en los huecos libres letras random. 
     let arrayRelleno = [];
-    for (i = 0; i <= filas; i++) {
+    let posiciones = crearPosiciones(filas, columnas, palabras.slice());
+
+    for (let i = 0; i < filas; i++) { // Se forma el relleno con letras aleatoriasa
         let letrasFila = [];
-        for (j = 0; j <= columnas; j++) {
-            letrasFila.push(ABC[Math.trunc(Math.random() *  ABC.length)]);
-        }
-            arrayRelleno.push(letrasFila);
-    }
-
-    let posiciones = crearPosiciones(filas, columnas, palabras);
-    let palabrasCopia = palabras.slice();
-    for ( i = 0; i < posiciones.length; i ++){
-        let palabraDividida = palabrasCopia[i].split('');
-        posiciones[i].forEach(posicion =>{
-            console.log(arrayRelleno[posicion[0]][posicion[1]]);
-            arrayRelleno[posicion[0]][posicion[1]] = palabraDividida[0];
-            palabraDividida.shift();
-
-        });
-    }
-    /* let elegidas = palabras.slice();
-    let palabra = [];
-    
-    elegidas.forEach(element => { palabra.push(element.split(''))})s
-    
-    let arrayRelleno = [];
-    let unaPalabraPorFila;
-
-    for (i = 0; i <= filas; i++) {
-    
-        let letrasFila = [];
-        unaPalabraPorFila = false;
-
-        for (j = 0; j <= columnas; j++) {
-            let random = Math.trunc(Math.random() * columnas);
-            if (validarPosicion(palabra, random, columnas, unaPalabraPorFila)) {
-                palabra[0].forEach(element => {
-
-                    letrasFila.push(element.toUpperCase());
-                    j++;
-                });
-                unaPalabraPorFila = true;
-                palabra.shift();
-            } else {
-                letrasFila.push(ABC[Math.trunc(Math.random() *  ABC.length)]);
-            }
+        for (let j = 0; j < columnas; j++) {
+            letrasFila.push(ABC[Math.trunc(Math.random() * ABC.length)]);
+            posiciones.forEach(posicion => {
+                for (n = 0; n < posicion.length; n++) {
+                    if ( posicion[n][0] == i && posicion[n][1] == j ) {
+                        //console.log(posicion[n][0] + ' pos  ' + posicion[n][1] + ' le '+posicion[n][2] );
+                        letrasFila.pop();
+                        letrasFila.push(posicion[n][2]);
+                    }
+                }
+            });
         }
         arrayRelleno.push(letrasFila);
-    } */
+    }
     return arrayRelleno;
 }
 
 function seleccionarLetra(e) {
     let cuadrado = document.getElementById(e.target.id);
+
     if (cuadrado.hasAttribute('disable')) {
         return;
     } else {
@@ -142,18 +130,16 @@ var archivo = new XMLHttpRequest();
 archivo.open('GET', ruta, false);
 
 archivo.onreadystatechange = function () {
-    if(archivo.readyState === 4)
-    {
-        if(archivo.status === 200 || archivo.status == 0)
-        {
+    if (archivo.readyState === 4) {
+        if (archivo.status === 200 || archivo.status == 0) {
             let texto = archivo.responseText;
             arrayPalabras = texto.split('\n');
         }
     }
 }
 archivo.send(null);
-    
-        // https://wordcodepress.com/leer-archivo-de-texto-con-javascript/
+
+// https://wordcodepress.com/leer-archivo-de-texto-con-javascript/
 //**************************************************************************
 
 function elegirPalabras(numero, arrayPalabras) {
@@ -162,7 +148,7 @@ function elegirPalabras(numero, arrayPalabras) {
     for (i = 0; i < numero; i++) {
         let palabra = arrayPalabras[Math.trunc(Math.random() * arrayPalabras.length)];
         if (palabra.length < longitudPalabra) {
-            elegidas.push(palabra);
+            elegidas.push(palabra.trim());
         } else {
             i--;
         }
@@ -182,6 +168,7 @@ function compararPalabras(palabrasElegidas, palabra) {
     });
 
     if (comprobacion) {
+        posiblesSelect = [];
         return true;
     } else {
         return false;
@@ -191,7 +178,7 @@ function compararPalabras(palabrasElegidas, palabra) {
 function sacarPalabra() {
     let letras = document.getElementsByClassName('amarillo');
     let palabra = '';
-    for ( i = 0; i < letras.length; i++) {
+    for (i = 0; i < letras.length; i++) {
         palabra += letras[i].textContent;
     }
     if (compararPalabras(palabrasElegidas, palabra)) {
@@ -236,7 +223,7 @@ let palabrasElegidas = elegirPalabras(numPalabras, arrayPalabras);
 crearTabla(filas, columnas, formarRelleno(filas, columnas, palabrasElegidas));
 
 // -------------------------------- Manipulación de objetos ---------------------------------
-function Palabras(arrayPalabras, palabrasAcertadas =  []) {
+function Palabras(arrayPalabras, palabrasAcertadas = []) {
     this.palabras = arrayPalabras;
     this.acertadas = palabrasAcertadas;
 
@@ -252,7 +239,7 @@ function Palabras(arrayPalabras, palabrasAcertadas =  []) {
         this.acertadas.push(palaraAcertada);
     }
 
-    this.numeroAcertadas = function( ){
+    this.numeroAcertadas = function () {
         return this.acertadas.length;
     }
 
@@ -261,17 +248,25 @@ function Palabras(arrayPalabras, palabrasAcertadas =  []) {
     }
 
     this.mostrarMarcador = function (nodo) {
-        if ( nodo.hasChildNodes() ) {
+        if (nodo.hasChildNodes()) {
             nodo.removeChild(nodo.firstChild);
         }
-        console.log(this.numeroAcertadas());
         escribir(this.numeroAcertadas() + '/' + this.totalPalabras(), nodo);
+        if ( this.numeroAcertadas() == this.totalPalabras() ) {
+            this.ganar();
+        }
+    }
+    
+    this.ganar = function () {
+        alert('Has ganado!');
+        resetear();
     }
 }
 
 let listaPalabras = new Palabras(palabrasElegidas);
 listaPalabras.escribirPalabras(lista);
 listaPalabras.mostrarMarcador(contenedorMarcador);
+
 
 
 
