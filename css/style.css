@@ -31,13 +31,14 @@ td {
   text-align: center;
   height: 30px;
   width: 30px;
+  cursor: pointer;
 }
 
 #cuerpo {
   height: 100vh;
   display: grid;
   grid-template-columns: minmax(50px 400px) 500px 170px 170px;
-  grid-template-rows: 20% 23% 57%;
+  grid-template-rows: 15% 23% 57%;
   justify-items: center;
 }
 

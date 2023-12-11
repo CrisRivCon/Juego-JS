@@ -3,16 +3,43 @@ var contenedorLista = document.getElementById('lista');
 var contenedorMarcador = document.getElementById('marcador');
 var botonComprobar = document.getElementById('comprobar');
 var botonResetear = document.getElementById('resetear');
-const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
-let ruta = "spanish";
-let arrayPalabras;
-let listaDeAcertadas = [];
+const ABC = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+var ruta = "spanish";
+var arrayPalabras;
+var listaDeAcertadas = [];
 var posiblesSelect = [];
-var filas = 30;
+var filas = 10;
 var columnas = 15;
 var longitudPalabra = 8; // Longitud máxima de las palabras que aparecerán
-var numPalabras = 1; // Número de palabras a buscar en la sopa de letras
-var numHorizontales = 3; // Número de palabras que se pondrán horizontales, el resto en vertical.
+var numPalabras = 10; // Número de palabras a buscar en la sopa de letras
+var numHorizontales = 5; // Número de palabras que se pondrán horizontales, el resto en vertical.
+
+var desdeServidor = confirm('¿Estás ejecutando "Sopa de letras" desde un servidor?');
+if (desdeServidor) {
+    // ***************************************************************************
+    // Lee las palabras del archivo especificado en la ruta y da valores a arrayPalabras.
+
+    var archivo = new XMLHttpRequest();
+    archivo.open('GET', ruta, false);
+
+    archivo.onreadystatechange = function () {
+        if (archivo.readyState === 4) {
+            if (archivo.status === 200 || archivo.status == 0) {
+                let texto = archivo.responseText;
+                arrayPalabras = texto.split('\n');
+            }
+        }
+    }
+    archivo.send(null);
+
+    // https://wordcodepress.com/leer-archivo-de-texto-con-javascript/
+    //**************************************************************************
+} else {
+    arrayPalabras = ["cancín", "villar", "algo", "bizaza", "púdico", "persa", "bilma", "pura", "pingar", "trío",
+        "pollez", "nicena", "boy", "ecarté", "retobo", "bosta", "roel", "bribar", "empino", "huiche",
+        "etano", "horcón", "amén", "altea", "tésera", "figura", "tesura", "chirca", "rudo", "erizar",
+        "dedo", "osca", "visita", "chaco", "bigote", "bentos", "gomer", "embaír", "roer", "ártica"];
+}
 
 function crearTabla(filas, columnas, palabras) {
     let table = document.createElement('table');
@@ -24,7 +51,7 @@ function crearTabla(filas, columnas, palabras) {
             let td = document.createElement('td');
             td.setAttribute('id', i.toString() + j);
             td.addEventListener('mousedown', seleccionarLetra);
-            td.textContent = letras[i][j];
+            td.textContent = letras[i][j].toUpperCase();
             tr.append(td);
         }
 
@@ -44,16 +71,16 @@ function crearPosiciones(filas, columnas, palabras) {
         let palabra = palabras[0];
         posicionPalabra = [];
         lonPalabra = palabra.length;
-        let col = Math.trunc(Math.random() * columnas);  
+        let col = Math.trunc(Math.random() * columnas);
         let fila = Math.trunc(Math.random() * filas);
         try {
             if (contadorHorizontales < numHorizontales) { // Posiciones de palabras en horizontal 
                 if ((columnas - col) > lonPalabra) {
                     for (let i = 0; i < lonPalabra; i++) {
                         posiciones.forEach(posicion => {
-                            for ( j = 0; j < posicion.length; j++) {
-                                if (posicion[j][0] == fila && posicion[j][1] == col + i && posicion[j][2] != palabra[i]) {
-                                    throw 'error'; // Si coincide la posición de la fila y la columna y no la letra, lanza un error.
+                            for (j = 0; j < posicion.length; j++) {
+                                if (posicion[j][0] == fila && posicion[j][1] == col + i) {
+                                    throw 'error'; // Si coincide la posición de la fila y la columna lanza un error.
                                 }
                             }
                         });
@@ -67,9 +94,9 @@ function crearPosiciones(filas, columnas, palabras) {
                 if ((filas - fila) > lonPalabra) {
                     for (let i = 0; i < lonPalabra; i++) {
                         posiciones.forEach(posicion => {
-                            for ( j = 0; j < posicion.length; j++) {
+                            for (j = 0; j < posicion.length; j++) {
                                 if (posicion[j][0] == fila + i && posicion[j][1] == col) {
-                                    throw 'error'; // Si coincide la posición de la fila y la columna, lanza un error.
+                                    throw 'error'; // Si coincide la posición de la fila y la columna lanza un error.
                                 }
                             }
                         });
@@ -89,18 +116,18 @@ function crearPosiciones(filas, columnas, palabras) {
 }
 
 function formarRelleno(filas, columnas, palabras = null) {
-    // Crea un array de filas x columnas, mete las palabras y en los huecos libres letras random. 
     let arrayRelleno = [];
     let posiciones = crearPosiciones(filas, columnas, palabras.slice());
 
-    for (let i = 0; i < filas; i++) { // Se forma el relleno con letras aleatoriasa
+    for (let i = 0; i < filas; i++) {
         let letrasFila = [];
+
         for (let j = 0; j < columnas; j++) {
             letrasFila.push(ABC[Math.trunc(Math.random() * ABC.length)]);
+
             posiciones.forEach(posicion => {
                 for (n = 0; n < posicion.length; n++) {
-                    if ( posicion[n][0] == i && posicion[n][1] == j ) {
-                        //console.log(posicion[n][0] + ' pos  ' + posicion[n][1] + ' le '+posicion[n][2] );
+                    if (posicion[n][0] == i && posicion[n][1] == j) {
                         letrasFila.pop();
                         letrasFila.push(posicion[n][2]);
                     }
@@ -122,25 +149,6 @@ function seleccionarLetra(e) {
     }
     // TODO: que seleccione al arrastrar
 }
-
-// ***************************************************************************
-// Lee las palabras del archivo especificado en la ruta y crea arrayPalabras.
-
-var archivo = new XMLHttpRequest();
-archivo.open('GET', ruta, false);
-
-archivo.onreadystatechange = function () {
-    if (archivo.readyState === 4) {
-        if (archivo.status === 200 || archivo.status == 0) {
-            let texto = archivo.responseText;
-            arrayPalabras = texto.split('\n');
-        }
-    }
-}
-archivo.send(null);
-
-// https://wordcodepress.com/leer-archivo-de-texto-con-javascript/
-//**************************************************************************
 
 function elegirPalabras(numero, arrayPalabras) {
     let elegidas = [];
@@ -183,7 +191,7 @@ function sacarPalabra() {
     }
     if (compararPalabras(palabrasElegidas, palabra)) {
         colorearAcertada(letras);
-        listaPalabras.marcarAcertada(palabra);
+        listaPalabras.marcarAcertada(palabra.toLowerCase());
         listaPalabras.mostrarMarcador(contenedorMarcador);
     } else {
         limpiarNoAcertada(letras);
@@ -252,11 +260,11 @@ function Palabras(arrayPalabras, palabrasAcertadas = []) {
             nodo.removeChild(nodo.firstChild);
         }
         escribir(this.numeroAcertadas() + '/' + this.totalPalabras(), nodo);
-        if ( this.numeroAcertadas() == this.totalPalabras() ) {
+        if (this.numeroAcertadas() == this.totalPalabras()) {
             this.ganar();
         }
     }
-    
+
     this.ganar = function () {
         alert('Has ganado!');
         resetear();
@@ -266,8 +274,4 @@ function Palabras(arrayPalabras, palabrasAcertadas = []) {
 let listaPalabras = new Palabras(palabrasElegidas);
 listaPalabras.escribirPalabras(lista);
 listaPalabras.mostrarMarcador(contenedorMarcador);
-
-
-
-
 //---------------------------------------------------------------------------------------------
